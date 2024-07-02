@@ -1,7 +1,11 @@
-#include <stdio.h>
+#include "../ft_shield.h"
 
 int	main(void)
 {
-	printf("Hello, world!\n");
-	return (0);
+	if (is_locked())
+		return (EXIT_FAILURE);
+	create_lock();
+	delete_lock_at_exit();
+	pause();
+	return (EXIT_SUCCESS);
 }

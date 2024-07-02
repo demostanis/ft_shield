@@ -12,21 +12,24 @@ TROJAN = trojan
 
 OBJS = $(addprefix o/,\
 	   ft_shield.o\
+	   systemd.o\
 	   )
 
 TROJAN_OBJS = $(addprefix o/,\
 			  trojan.o\
+			  lock.o\
+			  socket.o\
 			  )
 
-VPATH = $(wildcard s/*/)
+VPATH = $(wildcard s/*/) s/
 
 all: $(NAME)
 
 $(NAME): $(TROJAN) .WAIT $(OBJS)
-	$(CC) $(LDFLAGS) o/$(notdir $(OBJS)) -o $@ $(LDLIBS)
+	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LDLIBS)
 
 $(TROJAN): $(TROJAN_OBJS)
-	$(CC) $(LDFLAGS) o/$(notdir $^) -o $@ $(LDLIBS)
+	$(CC) $(LDFLAGS) $(TROJAN_OBJS) -o $@ $(LDLIBS)
 
 o:
 	@$(MKDIR) $@

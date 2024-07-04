@@ -20,6 +20,7 @@ void	create_lock(void)
 void	delete_lock(void)
 {
 	unlink(LOCKLOC);
+	exit(0);
 }
 
 void	delete_lock_at_exit(void)

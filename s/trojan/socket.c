@@ -1,5 +1,10 @@
 #include "../ft_shield.h"
 
+extern int	g_shelllvl;
+extern int	g_shelling;
+extern int	g_shells[BACKLOG];
+int			g_oks[BACKLOG];
+
 int	n_clients = 0;
 
 void	epoll_ctl_add(int epfd, int fd, int events)
@@ -33,23 +38,42 @@ int	create_server(void)
 	return (sfd);
 }
 
-extern int	g_shelllvl;
-extern int	g_shelling;
-extern int	g_shells[1024];
-
-void	shell_done(int)
+void	exit_client(int epfd, int cfd)
 {
-	--g_shelllvl;
-	if (g_shelllvl == 0)
-		g_shelling = 0;
+	epoll_ctl(epfd, EPOLL_CTL_DEL, cfd, NULL);
+	g_shells[cfd] = 0;
+	g_oks[cfd] = 0;
+	--n_clients;
+	close(cfd);
 }
 
-void	exit_client(int epfd, int fd)
+void	check_password(int epfd, int cfd)
 {
-	epoll_ctl(epfd, EPOLL_CTL_DEL, fd, NULL);
-	g_shells[fd] = 0;
-	--n_clients;
-	close(fd);
+	char	buf[4096];
+	ssize_t	n;
+
+	n = read(cfd, buf, sizeof buf);
+	if (n <= 0)
+		return ;
+	buf[n-1] = 0;
+	if (strcmp(buf, PASSWORD) == 0)
+	{
+		g_oks[cfd] = 1;
+		++n_clients;
+		if (g_shelling)
+			shell(epfd, cfd);
+		prompt(cfd);
+	}
+	else
+	{
+		write(cfd, INVALID_PASSWORD_MSG, sizeof INVALID_PASSWORD_MSG);
+		exit_client(epfd, cfd);
+	}
+}
+
+void	ask_password(int cfd)
+{
+	write(cfd, PASSWORD_PROMPT, sizeof PASSWORD_PROMPT);
 }
 
 void	listen_server(void)
@@ -57,18 +81,17 @@ void	listen_server(void)
 	int					epfd;
 	int					sfd;
 	int					n;
-	struct epoll_event	events[1024];
+	struct epoll_event	events[BACKLOG];
 	int					cfd;
 
 	sfd = create_server();
 	if (sfd < 0)
 		return ;
-	signal(SIGUSR1, shell_done);
 	epfd = epoll_create(1);
 	epoll_ctl_add(epfd, sfd, EPOLLIN|EPOLLOUT);
 	while (1)
 	{
-		n = epoll_wait(epfd, events, 1024, -1);
+		n = epoll_wait(epfd, events, BACKLOG, -1);
 		if (n < 0)
 		{
 			if (errno == EINTR)
@@ -77,23 +100,26 @@ void	listen_server(void)
 		}
 		while (n--)
 		{
-			if (events[n].data.fd == sfd)
+			cfd = events[n].data.fd;
+			if (cfd == sfd)
 			{
 				if (n_clients < CONCURRENT_USERS)
 				{
 					cfd = accept(sfd, NULL, 0);
 					epoll_ctl_add(epfd, cfd, EPOLLIN|EPOLLRDHUP);
-					++n_clients;
-					if (g_shelling)
-						shell(cfd, epfd);
-					prompt(cfd);
+					ask_password(cfd);
 				}
 			}
 			else if (events[n].events & EPOLLIN
-					&& !g_shells[events[n].data.fd])
-				handle_command(events[n].data.fd, epfd);
+					&& cfd < BACKLOG && !g_shells[cfd])
+			{
+				if (!g_oks[cfd])
+					check_password(epfd, cfd);
+				else
+					handle_command(epfd, cfd);
+			}
 			if (events[n].events & (EPOLLRDHUP|EPOLLHUP|EPOLLERR))
-				exit_client(epfd, events[n].data.fd);
+				exit_client(epfd, cfd);
 		}
 	}
 }

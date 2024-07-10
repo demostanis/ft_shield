@@ -44,6 +44,8 @@ void	exit_client(int epfd, int cfd)
 	g_shells[cfd] = 0;
 	g_oks[cfd] = 0;
 	--n_clients;
+	if (n_clients < 0)
+		n_clients = 0;
 	close(cfd);
 }
 

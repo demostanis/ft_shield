@@ -27,6 +27,7 @@ void	shell(int epfd, int cfd)
 			dup2(cfd, STDIN_FILENO);
 			dup2(cfd, STDOUT_FILENO);
 			dup2(cfd, STDERR_FILENO);
+			chdir("/");
 			execl("/bin/bash", "bash", "-i", NULL);
 		}
 		else

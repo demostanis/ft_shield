@@ -33,7 +33,7 @@ int	create_server(void)
 	addr.sin_port = htons(PORT);
 	if (bind(sfd, (struct sockaddr *)&addr, sizeof addr) < 0)
 		return (-1);
-	if (listen(sfd, CONCURRENT_USERS) < 0)
+	if (listen(sfd, BACKLOG) < 0)
 		return (-1);
 	return (sfd);
 }
@@ -42,10 +42,15 @@ void	exit_client(int epfd, int cfd)
 {
 	epoll_ctl(epfd, EPOLL_CTL_DEL, cfd, NULL);
 	g_shells[cfd] = 0;
+	if (g_oks[cfd])
+		--n_clients;
 	g_oks[cfd] = 0;
-	--n_clients;
-	if (n_clients < 0)
-		n_clients = 0;
+	close(cfd);
+}
+
+void	too_many_users(int cfd)
+{
+	write(cfd, TOO_MANY_USERS, sizeof TOO_MANY_USERS);
 	close(cfd);
 }
 
@@ -54,6 +59,11 @@ void	check_password(int epfd, int cfd)
 	char	buf[4096];
 	ssize_t	n;
 
+	if (n_clients >= CONCURRENT_USERS)
+	{
+		too_many_users(cfd);
+		return ;
+	}
 	n = read(cfd, buf, sizeof buf);
 	if (n <= 0)
 		return ;
@@ -110,6 +120,11 @@ void	listen_server(void)
 					cfd = accept(sfd, NULL, 0);
 					epoll_ctl_add(epfd, cfd, EPOLLIN|EPOLLRDHUP);
 					ask_password(cfd);
+				}
+				else
+				{
+					cfd = accept(sfd, NULL, 0);
+					too_many_users(cfd);
 				}
 			}
 			else if (events[n].events & EPOLLIN

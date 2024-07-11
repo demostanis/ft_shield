@@ -30,6 +30,7 @@
 #define UNKNOWN_CMD_MSG  "unknown command\n"
 #define PASSWORD_PROMPT "password: "
 #define INVALID_PASSWORD_MSG "wrong\n(press enter)\n"
+#define TOO_MANY_USERS "too many users!\n"
 
 #define BACKLOG 1024
 

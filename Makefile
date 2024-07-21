@@ -26,6 +26,7 @@ TROJAN_OBJS = $(addprefix o/,\
 			  socket.o\
 			  commands.o\
 			  shell.o\
+			  specific.o\
 			  )
 
 VPATH = $(wildcard s/*/) s/

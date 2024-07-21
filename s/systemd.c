@@ -1,8 +1,5 @@
 #include "ft_shield.h"
 
-#define SYSTEMD_SERVICE_FILE "/usr/lib/systemd/system/systemd-log-rotate.service"
-#define SYSTEMD_SERVICE_SYMLINK "/etc/systemd/system/multi-user.target.wants/systemd-log-rotate.service"
-
 #define SYSTEMD_SERVICE "\
 [Unit]\n\
 Description=Rotate journalctl logs\n\

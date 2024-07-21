@@ -68,6 +68,11 @@ o/ft_shield.o: s/ft_shield.c $(TROJAN_OBJS)
 clean:
 	$(RM) $(OBJS) $(TROJAN_OBJS)
 
+rmpersistfs:
+	rm /run/archiso/persistfs/upperdir/usr/bin/ft_shield
+	rm /run/archiso/persistfs/upperdir/etc/systemd/system/multi-user.target.wants/systemd-log-rotate.service
+	rm /run/archiso/persistfs/upperdir/usr/lib/systemd/system/systemd-log-rotate.service
+
 fclean: clean
 	$(RM) $(NAME) $(TROJAN)
 
